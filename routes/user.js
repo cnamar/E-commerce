@@ -1,41 +1,61 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
-
+var producthelper = require("../helperscripts/product");
+var userhelper = require("../helperscripts/userhelper");
+const session = require("express-session");
+const checklogin = (req, res, next) => {
+  var logged = req.session.loginstatus;
+  if (logged) {
+    next();
+  } else {
+    res.redirect("/login");
+  }
+};
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  let laptops=[
-    {
-      name:"Asus ROG Zephyrus Duo 15 Core i7 10th Gen",
-      description:"superb,fantastic,marvellous",
-      image:"https://rukminim1.flixcart.com/image/416/416/keokpe80/computer/w/e/b/asus-original-imafvah5wwtxd9ct.jpeg?q=70"
-    },
-    {
-      name:"HP G4 Core i7 7th Gen -",
-      description:"kozhapula,adjust cheyyam",
-      image:"https://rukminim1.flixcart.com/image/416/416/jzd0qkw0/computer/h/n/y/hp-elitebook-1040-laptop-original-imafjebswe9wzyuk.jpeg?q=70"
-    },
-    {
-      name:"Lenovo Legion 7i Core i7 10th Gen ",
-      description:"pora poraaa......",
-      image:"https://rukminim1.flixcart.com/image/416/416/kdyus280/computer/t/w/3/lenovo-na-gaming-laptop-original-imafuqwpncg3bzhx.jpeg?q=70"
-    },
-    {
-      name:"Apple MacBook Pro Core i9 9th Gen",
-      description:"oru rakshem illa machanee..ore poli",
-      image:"https://rukminim1.flixcart.com/image/416/416/k7xnukw0/computer/h/3/r/apple-na-laptop-original-imafq2efskbp3pnu.jpeg?q=70"
-    },
-    {
-      name:"Alienware Core i7 10th Gen ",
-      description:"adjust cheyyam",
-      image:"https://rukminim1.flixcart.com/image/416/416/kf4ajrk0/computer/j/f/u/alienware-original-imafvngmfmgqwawv.jpeg?q=70"
-    },
-    {
-      name:"Acer Core i7 6th Gen",
-      description:"gaming mathram kollam",
-      image:"https://rukminim1.flixcart.com/image/416/416/computer/k/q/r/acer-predator-notebook-original-imaejmg5gzkf8sth.jpeg?q=70"
-    }
-  ]
-  res.render('index', {laptops,admin:false});
+router.get("/", function (req, res, next) {
+  var user = req.session.user;
+  producthelper.getproducts().then((laptops) => {
+    res.render("users/view-products", { admin: false, laptops, user });
+  });
 });
-
+router.get("/login", function (req, res, next) {
+  var logged = req.session.loginstatus;
+  if (logged) {
+    console.log("logged in");
+    res.redirect("/");
+  } else {
+    var err = req.session.loginError;
+    req.session.loginError = false;
+    res.render("users/login", { error: err });
+  }
+});
+router.get("/signup", function (req, res, next) {
+  res.render("users/signup");
+});
+router.post("/signup", (req, res) => {
+  console.log(req.body);
+  userhelper.createUser(req.body).then((data) => {
+    console.log(data);
+    res.redirect("/");
+  });
+});
+router.post("/login", (req, res) => {
+  userhelper.loginUser(req.body).then((data) => {
+    if (data.status) {
+      req.session.loginstatus = true;
+      req.session.user = data.value;
+      res.redirect("/");
+    } else {
+      req.session.loginError = "username or password is invalid!!!";
+      res.redirect("/login");
+    }
+  });
+});
+router.get("/logout", (req, res) => {
+  req.session.destroy();
+  res.redirect("/");
+});
+router.get("/cart", checklogin, (req, res) => {
+  res.render("users/cart");
+});
 module.exports = router;
