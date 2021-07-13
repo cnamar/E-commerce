@@ -41,6 +41,7 @@ module.exports = {
         });
     });
   },
+
   updateproduct: (id, product) => {
     return new Promise(async (resolve, reject) => {
       db.get()

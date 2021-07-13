@@ -3,7 +3,7 @@
     <div class="row">
       {{#each laptops}}
         <div class="col-md-4 p-2">
-          <div class="card text-center" style="height:30rem;">
+          <div class="card text-center" style="height:25rem;">
             <img
               class="card-img-top mt-4 ml-5"
               src="/product-images/{{this._id}}.jpg"
@@ -14,7 +14,8 @@
               <h5 class="card-title">{{this.name}}</h5>
               <p class="card-text">{{this.description}}</p>
 
-              <a href="#" class="btn btn-primary">Add to cart</a>
+              <a href="/add-cart/{{this._id}}" class="btn btn-primary">Add to
+                cart</a>
             </div>
           </div>
         </div>
